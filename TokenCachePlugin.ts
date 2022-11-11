@@ -18,7 +18,7 @@ export class TokenCachePlugin implements ICachePlugin {
 			encryptedCache !== null
 				? safeStorage.decryptString(
 						Buffer.from(encryptedCache, "latin1")
-				  )
+						)
 				: "";
 
 		cacheContext.tokenCache.deserialize(cache);

@@ -47,7 +47,7 @@ export default class MyPlugin extends Plugin {
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
 				const eventsTable = await new GraphExplorer(
 					this.graphClient
-				).obsidianRenderDayGraphEventsAsTable();
+				).obsidianRenderTodaysEvent();
 
 				editor.replaceSelection(eventsTable);
 			},
@@ -59,7 +59,7 @@ export default class MyPlugin extends Plugin {
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
 				const eventsTable = await new GraphExplorer(
 					this.graphClient
-				).obsidianRenderWeekGraphEventsAsTable();
+				).obsidianRenderWeekEvents();
 
 				editor.replaceSelection(eventsTable);
 			},
