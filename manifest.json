@@ -1,10 +1,10 @@
 {
-	"id": "obsidian-sample-plugin",
-	"name": "Sample Plugin",
+	"id": "obsidian-o365import-plugin",
+	"name": "O365 Events Import",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "This is a sample plugin for Obsidian. This plugin demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
+	"description": "Import O365 graph data to Obsidian",
+	"author": "Daniel Kloyber",
+	"authorUrl": "https://www.kadevee.com",
 	"isDesktopOnly": false
 }
