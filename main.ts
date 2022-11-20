@@ -103,8 +103,6 @@ class SampleSettingTab extends PluginSettingTab {
 		super(app, plugin);
 		this.plugin = plugin;
 
-		console.log("sample setting tab constructor");
-
 		this.plugin.authProvider.onLogin = async () => {
 			console.log("onLogin");
 

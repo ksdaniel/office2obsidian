@@ -81,8 +81,6 @@ export default class DeviceCodeAuthProvider implements AuthenticationProvider {
 			scopes: this.scopes,
 		};
 
-		debugger;
-
 		const response = await this.client.acquireTokenByDeviceCode(
 			deviceCodeRequest,
 		);
@@ -101,30 +99,8 @@ export default class DeviceCodeAuthProvider implements AuthenticationProvider {
 			cache: {
 				cachePlugin: this.cachePlugin,
 			},
-			system: {
-				loggerOptions: {
-					loggerCallback: (level, message, containsPii) => {
-						if (containsPii) {
-							console.log("MSAL PII LOG: ", message);
-						}
-						switch (level) {
-							case 0:
-								console.error(message);
-								return;
-							case 1:
-								console.warn(message);
-								return;
-							case 2:
-								console.info(message);
-								return;
-							case 3:
-								console.log(message);
-								return;
-						}
-					},
-				}
-			},
 		});
+		
 		this.client = client;
 	}
 
