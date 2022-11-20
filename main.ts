@@ -45,7 +45,7 @@ export default class MyPlugin extends Plugin {
 		// This adds an editor command that can perform some operation on the current editor instance
 		this.addCommand({
 			id: "add-graph-day-events-table",
-			name: "O365 Today Events",
+			name: "Today's events",
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
 				const eventsTable = await this.graphExplorer.obsidianRenderTodaysEvent();
 
@@ -55,7 +55,7 @@ export default class MyPlugin extends Plugin {
 
 		this.addCommand({
 			id: "add-graph-week-events-table",
-			name: "O365 Week Events",
+			name: "This weeks events",
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
 				const eventsTable = await this.graphExplorer.obsidianRenderWeekEvents();
 
