@@ -8,22 +8,24 @@ import {
 	MarkdownView,
 	Plugin,
 	PluginSettingTab,
+	Setting,
 } from "obsidian";
 
 // Remember to rename these classes and interfaces!
 
-interface MyPluginSettings {
-	mySetting: string;
+export interface MyPluginSettings {
+	folderName: string;
 }
 
 const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: "default",
+	folderName: "",
 };
 
 export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
 	authProvider: DeviceCodeAuthProvider;
 	graphClient: Client;
+	graphExplorer: GraphExplorer;
 
 	async onload() {
 		await this.loadSettings();
@@ -38,14 +40,14 @@ export default class MyPlugin extends Plugin {
 			defaultVersion: "beta",
 		});
 
+		this.graphExplorer = new GraphExplorer(this.graphClient, this.settings);
+
 		// This adds an editor command that can perform some operation on the current editor instance
 		this.addCommand({
 			id: "add-graph-day-events-table",
 			name: "O365 Today Events",
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
-				const eventsTable = await new GraphExplorer(
-					this.graphClient
-				).obsidianRenderTodaysEvent();
+				const eventsTable = await this.graphExplorer.obsidianRenderTodaysEvent();
 
 				editor.replaceSelection(eventsTable);
 			},
@@ -55,9 +57,7 @@ export default class MyPlugin extends Plugin {
 			id: "add-graph-week-events-table",
 			name: "O365 Week Events",
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
-				const eventsTable = await new GraphExplorer(
-					this.graphClient
-				).obsidianRenderWeekEvents();
+				const eventsTable = await this.graphExplorer.obsidianRenderWeekEvents();
 
 				editor.replaceSelection(eventsTable);
 			},
@@ -139,13 +139,28 @@ class SampleSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		containerEl.createEl("h2", { text: "O365 to Obsidian events import" });
+		containerEl.createEl("h3", { text: "Settings" });
 
-		containerEl.createEl("h3", {
+		new Setting(containerEl)
+			.setName("Meetings Folder")
+			.setDesc("Set the folder where the meeting notes will be saved")
+			.addText((text) =>
+				text
+					.setPlaceholder("Enter folder name")
+					.setValue(this.plugin.settings.folderName)
+					.onChange(async (value) => {
+						this.plugin.settings.folderName = value;
+						await this.plugin.saveSettings();
+					})
+			);
+
+		const c = containerEl.createEl("h2", {
 			text: this.userEmail
 				? `Logged in as: ${this.userEmail}`
 				: "Not logged in",
 		});
+
+		c.style.marginTop = "20px";
 
 		new ButtonComponent(containerEl)
 			.setButtonText(this.isLoggedIn ? "Logout" : "Login")

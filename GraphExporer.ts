@@ -1,11 +1,14 @@
 import { Client } from "@microsoft/microsoft-graph-client";
 import { DateTime } from "luxon";
+import { MyPluginSettings } from "main";
 
 export default class GraphExplorer {
 	graphClient: Client;
+	settings: MyPluginSettings;
 
-	constructor(graphClient: Client) {
+	constructor(graphClient: Client, settings: MyPluginSettings) {
 		this.graphClient = graphClient;
+		this.settings = settings;
 	}
 
 	public async obsidianRenderTodaysEvent() {
@@ -13,7 +16,7 @@ export default class GraphExplorer {
 		const tomorrow = this.getTomorrow();
 		const events = await this.getUserEventsBetweenDates(today, tomorrow);
 
-		const title = `# Events for the day of ${today.toLocaleDateString()} \n\n`;
+		const title = `## Events for the day of ${today.toLocaleDateString()} \n\n`;
 
 		let eventsTable =
 			title +
@@ -28,7 +31,9 @@ export default class GraphExplorer {
 				event.end.dateTime,
 				event.end.timeZone,
 				"time"
-			)} | ${event.subject} | [[${event.subject}]] |\n`;
+			)} | ${
+				event.subject
+			} | ${this.createNoteLink(event)} \n`
 		});
 
 		return eventsTable;
@@ -43,7 +48,7 @@ export default class GraphExplorer {
 			lastDayOfWeek
 		);
 
-		const title = `# Events for the week of ${firstDayOfWeek.toLocaleDateString()} to ${lastDayOfWeek.toLocaleDateString()} \n\n`;
+		const title = `## Events for the week of ${firstDayOfWeek.toLocaleDateString()} to ${lastDayOfWeek.toLocaleDateString()} \n\n`;
 
 		let eventsTable =
 			title +
@@ -128,11 +133,38 @@ export default class GraphExplorer {
 
 		switch (format) {
 			case "date":
-				return localTime.toLocaleString(DateTime.DATE_SHORT);
+				return localTime.toFormat("yyMMdd");
 			case "time":
 				return localTime.toLocaleString(DateTime.TIME_24_SIMPLE);
 			default:
 				return localTime.toLocaleString(DateTime.DATE_SHORT);
 		}
+	}
+
+	private getFolderName() {
+		if (this.settings.folderName) return `${this.settings.folderName}`;
+		else return "";
+	}
+
+	private createNoteTitle(event: any) {
+		const date = this.getDateString(
+			event.start.dateTime,
+			event.start.timeZone,
+			"date"
+		);
+		const subject = event.subject;
+		return `${date} ${subject}.md`.trim().replace(/ /g, "_");
+	}
+
+	//[Test123](Meetings/test.md)
+
+	private createNoteLink(event: any) {
+		return `[${this.getDateString(
+			event.start.dateTime,
+			event.start.timeZone,
+			"date"
+		)} ${event.subject}](${this.getFolderName()}/${this.createNoteTitle(
+			event
+		)})`;
 	}
 }
