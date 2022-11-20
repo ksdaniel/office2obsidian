@@ -1,6 +1,6 @@
 import { AuthenticationProvider } from "@microsoft/microsoft-graph-client";
 import { AccountInfo, PublicClientApplication } from "@azure/msal-node";
-import { LoginModal, SampleModal } from "LoginModal";
+import { LoginModal } from "LoginModal";
 import { App } from "obsidian";
 import { TokenCachePlugin } from "TokenCachePlugin";
 
@@ -9,10 +9,7 @@ export default class DeviceCodeAuthProvider implements AuthenticationProvider {
 	private app: App;
 	private cachePlugin: TokenCachePlugin;
 	private client: PublicClientApplication;
-	private scopes: [
-		"https://graph.microsoft.com/User.Read",
-		"https://graph.microsoft.com/Calendars.Read"
-	];
+	private scopes: string[];
 	private modal: LoginModal;
 
 	public onLogout?: () => void;
@@ -23,6 +20,13 @@ export default class DeviceCodeAuthProvider implements AuthenticationProvider {
 		this.cachePlugin = new TokenCachePlugin();
 		this.modal = new LoginModal(this.app);
 		this.initPublicClientApplication();
+
+		//hardcoded scopes for now - could be passed in as a parameter
+
+		this.scopes = [
+			"https://graph.microsoft.com/User.Read",
+			"https://graph.microsoft.com/Calendars.Read"
+		];
 	}
 
 	public async logout() {
@@ -31,7 +35,6 @@ export default class DeviceCodeAuthProvider implements AuthenticationProvider {
 		if (this.onLogout) {
 			this.onLogout();
 		}
-
 	}
 
 	public async getAccessToken(): Promise<string> {
@@ -69,6 +72,7 @@ export default class DeviceCodeAuthProvider implements AuthenticationProvider {
 	}
 
 	public async getByDeviceCode() {
+		
 		const deviceCodeRequest = {
 			deviceCodeCallback: (response) => {
 				this.modal.setMessage(response.message);
@@ -77,8 +81,10 @@ export default class DeviceCodeAuthProvider implements AuthenticationProvider {
 			scopes: this.scopes,
 		};
 
+		debugger;
+
 		const response = await this.client.acquireTokenByDeviceCode(
-			deviceCodeRequest
+			deviceCodeRequest,
 		);
 
 		if (response && response.accessToken) {
@@ -90,18 +96,39 @@ export default class DeviceCodeAuthProvider implements AuthenticationProvider {
 		const client = new PublicClientApplication({
 			auth: {
 				clientId: this.clientId,
-				authority:
-					"https://login.microsoftonline.com/b36f4c0f-b916-40ae-ad8b-d2f0ea4f8868",
+				authority: "https://login.microsoftonline.com/organizations",
 			},
 			cache: {
 				cachePlugin: this.cachePlugin,
+			},
+			system: {
+				loggerOptions: {
+					loggerCallback: (level, message, containsPii) => {
+						if (containsPii) {
+							console.log("MSAL PII LOG: ", message);
+						}
+						switch (level) {
+							case 0:
+								console.error(message);
+								return;
+							case 1:
+								console.warn(message);
+								return;
+							case 2:
+								console.info(message);
+								return;
+							case 3:
+								console.log(message);
+								return;
+						}
+					},
+				}
 			},
 		});
 		this.client = client;
 	}
 
 	public async getloggedInUser(): Promise<AccountInfo | null> {
-
 		if (this.client != null) {
 			const cache = await this.client.getTokenCache();
 			if (cache != null) {

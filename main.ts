@@ -1,4 +1,3 @@
-import { PublicClientApplication } from "@azure/msal-node";
 import { Client } from "@microsoft/microsoft-graph-client";
 import DeviceCodeAuthProvider from "DeviceCodeAuthProvider";
 import GraphExplorer from "GraphExporer";
@@ -9,7 +8,6 @@ import {
 	MarkdownView,
 	Plugin,
 	PluginSettingTab,
-	TextComponent,
 } from "obsidian";
 
 // Remember to rename these classes and interfaces!
@@ -31,7 +29,7 @@ export default class MyPlugin extends Plugin {
 		await this.loadSettings();
 
 		this.authProvider = new DeviceCodeAuthProvider(
-			"e372a8e0-5b7b-4e04-b89e-0a9c37535eb9",
+			"150e3906-8875-4502-8933-8d8fad4f26d2",
 			this.app
 		);
 
